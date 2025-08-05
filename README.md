@@ -5,7 +5,7 @@
 
 
 ![teaser](prompt-to-prompt-main-jittor/docs/teaser.png)
-### [Project Page]([NJUST-wyx/20---prompt-to-prompt](https://github.com/NJUST-wyx/20---prompt-to-prompt))&ensp;&ensp;&ensp;[Paper](https://prompt-to-prompt.github.io/ptp_files/Prompt-to-Prompt_preprint.pdf)
+### [Project Page]([NJUST-wyx/20---prompt-to-prompt](https://github.com/NJUST-wyx/20---prompt-to-prompt/tree/master))&ensp;&ensp;&ensp;[Paper](https://prompt-to-prompt.github.io/ptp_files/Prompt-to-Prompt_preprint.pdf)
 
 
 ## Install Requirements
