@@ -32,16 +32,30 @@ from JDiffusion import StableDiffusionPipeline
 import torch.nn.functional as nnf
 import numpy as np
 import abc
-import ptp_utils
+
 import seq_aligner
 
 #加入输出函数
-import ptp_utils
+import ptp_utils_no_use_juypter
 import os
 
-# For loading the Stable Diffusion using Diffusers, follow the instuctions https://huggingface.co/blog/stable_diffusion and update ```MY_TOKEN``` with your token.
-# Set ```LOW_RESOURCE``` to ```True``` for running on 12GB GPU.
+import random
+import jittor
 
+
+def set_all_random_seeds(seed=42):
+    # 固定Python内置随机模块
+    random.seed(seed)
+
+    # 固定NumPy随机种子
+    np.random.seed(seed)
+
+    # 如果使用Jittor，固定Jittor的随机种子
+    jittor.set_seed(seed)
+
+
+# 立即调用，确保在所有随机操作前生效
+set_all_random_seeds(seed=42)  # 建议使用固定数字（如42），方便复现
 # In[ ]:
 
 
@@ -89,7 +103,7 @@ class LocalBlend:
             if type(words_) is str:
                 words_ = [words_]
             for word in words_:
-                ind = ptp_utils.get_word_inds(prompt, word, tokenizer)
+                ind = ptp_utils_no_use_juypter.get_word_inds(prompt, word, tokenizer)
                 alpha_layers[i, :, :, :, :, ind] = 1
         self.alpha_layers = alpha_layers
         self.threshold = threshold
@@ -227,7 +241,7 @@ class AttentionControlEdit(AttentionStore, abc.ABC):
                  local_blend: Optional[LocalBlend]):
         super(AttentionControlEdit, self).__init__()
         self.batch_size = len(prompts)
-        self.cross_replace_alpha = ptp_utils.get_time_words_attention_alpha(prompts, num_steps, cross_replace_steps, tokenizer)
+        self.cross_replace_alpha = ptp_utils_no_use_juypter.get_time_words_attention_alpha(prompts, num_steps, cross_replace_steps, tokenizer)
         if type(self_replace_steps) is float:
             self_replace_steps = 0, self_replace_steps
         self.num_self_replace = int(num_steps * self_replace_steps[0]), int(num_steps * self_replace_steps[1])
@@ -281,7 +295,7 @@ def get_equalizer(text: str, word_select: Union[int, Tuple[int, ...]], values: U
     equalizer = torch.ones(len(values), 77)
     values = torch.tensor(values, dtype=torch.float32)
     for word in word_select:
-        inds = ptp_utils.get_word_inds(text, word, tokenizer)
+        inds = ptp_utils_no_use_juypter.get_word_inds(text, word, tokenizer)
         equalizer[:, inds] = values
     return equalizer
 
@@ -317,11 +331,11 @@ def show_cross_attention(attention_store: AttentionStore, res: int, from_where: 
         image = image.unsqueeze(-1).expand(*image.shape, 3)
         image = image.numpy().astype(np.uint8)
         image = np.array(Image.fromarray(image).resize((256, 256)))
-        image = ptp_utils.text_under_image(image, decoder(int(tokens[i])))
+        image = ptp_utils_no_use_juypter.text_under_image(image, decoder(int(tokens[i])))
         images.append(image)
         captions.append(decoder(int(tokens[i])))
-    ptp_utils.view_images(np.stack(images, axis=0))
-    return ptp_utils.view_images_html(images, captions)
+    ptp_utils_no_use_juypter.view_images(np.stack(images, axis=0))
+    return ptp_utils_no_use_juypter.view_images_html(images, captions)
     
 
 def show_self_attention_comp(attention_store: AttentionStore, res: int, from_where: List[str],
@@ -338,8 +352,8 @@ def show_self_attention_comp(attention_store: AttentionStore, res: int, from_whe
         image = Image.fromarray(image).resize((256, 256))
         image = np.array(image)
         images.append(image)
-    ptp_utils.view_images(np.concatenate(images, axis=1))
-    return ptp_utils.view_images_html(images, captions)
+    ptp_utils_no_use_juypter.view_images(np.concatenate(images, axis=1))
+    return ptp_utils_no_use_juypter.view_images_html(images, captions)
 
 
 # In[4]:
@@ -350,30 +364,30 @@ def run_and_display(prompts, controller, latent=None, run_baseline=False, genera
         print("w.o. prompt-to-prompt")
         images, latent = run_and_display(prompts, EmptyControl(), latent=latent, run_baseline=False, generator=generator)
         print("with prompt-to-prompt")
-    images, x_t = ptp_utils.text2image_ldm_stable(ldm_stable, prompts, controller, latent=latent, num_inference_steps=NUM_DIFFUSION_STEPS, guidance_scale=GUIDANCE_SCALE, generator=generator, low_resource=LOW_RESOURCE)
-    
-    # 新增：获取图像路径
-    image_path = images[1]
-    # 新增：生成HTML文件
-    html_content = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Prompt-to-Prompt Output</title>
-    </head>
-    <body>
-        <h1>Generated Image</h1>
-        <img src="{image_path}" alt="Generated Image">
-    </body>
-    </html>
-    """
-    output_html_path = 'output.html'
-    with open(output_html_path, 'w', encoding='utf-8') as f:
-        f.write(html_content)
-    return images[0], x_t
+    images, x_t = ptp_utils_no_use_juypter.text2image_ldm_stable(ldm_stable, prompts, controller, latent=latent, num_inference_steps=NUM_DIFFUSION_STEPS, guidance_scale=GUIDANCE_SCALE, generator=generator, low_resource=LOW_RESOURCE)
 
-    ptp_utils.view_images(images)
+    # # 新增：获取图像路径
+    # image_path = images[1]
+    # # 新增：生成HTML文件
+    # html_content = f"""
+    # <!DOCTYPE html>
+    # <html>
+    # <head>
+    #     <meta charset="UTF-8">
+    #     <title>Prompt-to-Prompt Output</title>
+    # </head>
+    # <body>
+    #     <h1>Generated Image</h1>
+    #     <img src="{image_path}" alt="Generated Image">
+    # </body>
+    # </html>
+    # """
+    # output_html_path = 'output.html'
+    # with open(output_html_path, 'w', encoding='utf-8') as f:
+    #     f.write(html_content)
+    # return images[0], x_t
+
+    ptp_utils_no_use_juypter.view_images(images)
     return images, x_t
 
 
@@ -392,7 +406,7 @@ prompts = ["A painting of a squirrel eating a burger"]
 controller = AttentionStore()
 
 # 添加标题（字符串）
-#report_sections.append(ptp_utils.text_section_html("1. Base Image Generation"))
+#report_sections.append(ptp_utils_no_use_juypter.text_section_html("1. Base Image Generation"))
 
 # 生成图像（获取numpy数组）
 images, x_t = run_and_display(prompts, controller, run_baseline=False, generator=g_cpu)
@@ -400,11 +414,11 @@ images, x_t = run_and_display(prompts, controller, run_baseline=False, generator
 # 关键修正：将numpy图像转换为HTML字符串后再添加
 for img, prompt in zip(images, prompts):
     # 转换单张图像为HTML片段（字符串）
-    img_html = ptp_utils.view_images_html([img], [prompt])
+    img_html = ptp_utils_no_use_juypter.view_images_html([img], [prompt])
     report_sections.append(img_html)  # 添加的是字符串，不是numpy数组
 
 # 注意力可视化（确保返回的是HTML字符串）
-report_sections.append(ptp_utils.text_section_html("Cross-Attention Maps"))
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("Cross-Attention Maps"))
 attn_html = show_cross_attention(controller, res=16, from_where=("up", "down"))
 # 验证返回类型（防御性编程）
 if isinstance(attn_html, str):
@@ -415,18 +429,18 @@ else:
 # 2. 替换编辑示例
 prompts_replace = ["A painting of a squirrel eating a burger", "A painting of a lion eating a burger"]
 controller_replace = AttentionReplace(prompts_replace, NUM_DIFFUSION_STEPS, cross_replace_steps=.8, self_replace_steps=0.4)
-report_sections.append(ptp_utils.text_section_html("2. Replacement Edit Example"))
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("2. Replacement Edit Example"))
 
 replace_images, _ = run_and_display(prompts_replace, controller_replace, latent=x_t, run_baseline=True)
 # 再次确保添加的是HTML字符串
-replace_html = ptp_utils.view_images_html(replace_images, prompts_replace)
+replace_html = ptp_utils_no_use_juypter.view_images_html(replace_images, prompts_replace)
 report_sections.append(replace_html)
 
-# 生成完整HTML（此时所有元素都是字符串，可安全join）
-full_html = ptp_utils.html_wrapper("\n".join(report_sections), "Prompt-to-Prompt Results")
-with open("prompt_to_prompt_results.html", "w", encoding="utf-8") as f:
-    f.write(full_html)
-print("HTML report saved as 'prompt_to_prompt_results.html'")
+# # 生成完整HTML（此时所有元素都是字符串，可安全join）
+# full_html = ptp_utils_no_use_juypter.html_wrapper("\n".join(report_sections), "Prompt-to-Prompt Results")
+# with open("prompt_to_prompt_results.html", "w", encoding="utf-8") as f:
+#     f.write(full_html)
+# print("HTML report saved as 'prompt_to_prompt_results.html'")
 
 
 
@@ -437,189 +451,230 @@ print("HTML report saved as 'prompt_to_prompt_results.html'")
 # In[8]:
 
 
+# 1. 替换编辑示例（AttentionReplace）
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("1. 基础替换编辑"))
 prompts = ["A painting of a squirrel eating a burger",
            "A painting of a lion eating a burger"]
-controller = AttentionReplace(prompts, NUM_DIFFUSION_STEPS, cross_replace_steps={"default_": 1., "lion": .4},
-                              self_replace_steps=0.4)
-_ = run_and_display(prompts, controller, latent=x_t, run_baseline=False)
+controller = AttentionReplace(
+    prompts,
+    NUM_DIFFUSION_STEPS,
+    cross_replace_steps={"default_": 1., "lion": .4},
+    self_replace_steps=0.4
+)
+# 生成图像并获取结果
+images, _ = run_and_display(prompts, controller, latent=x_t, run_baseline=False, generator=g_cpu)
+# 转换为HTML并添加到报告
+img_html = ptp_utils_no_use_juypter.view_images_html(images, prompts)
+report_sections.append(img_html)
 
 
-# ### Local Edit
-# Lastly, if we want to preseve the original burger, we can apply a local edit with respect to the squirrel and the lion
-
-# In[10]:
-
-
+# 2. 局部编辑示例（LocalBlend + AttentionReplace）
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("2. 局部保留替换编辑"))
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("保留汉堡，仅替换松鼠为狮子"))
 prompts = ["A painting of a squirrel eating a burger",
            "A painting of a lion eating a burger"]
 lb = LocalBlend(prompts, ("squirrel", "lion"))
-controller = AttentionReplace(prompts, NUM_DIFFUSION_STEPS,
-                              cross_replace_steps={"default_": 1., "lion": .4},
-                              self_replace_steps=0.4, local_blend=lb)
-_ = run_and_display(prompts, controller, latent=x_t, run_baseline=False)
+controller = AttentionReplace(
+    prompts,
+    NUM_DIFFUSION_STEPS,
+    cross_replace_steps={"default_": 1., "lion": .4},
+    self_replace_steps=0.4,
+    local_blend=lb
+)
+images, _ = run_and_display(prompts, controller, latent=x_t, run_baseline=False, generator=g_cpu)
+img_html = ptp_utils_no_use_juypter.view_images_html(images, prompts)
+report_sections.append(img_html)
 
 
-# In[11]:
-
-
+# 3. 局部替换食物示例
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("3. 局部替换食物（汉堡→千层面）"))
 prompts = ["A painting of a squirrel eating a burger",
            "A painting of a squirrel eating a lasagne"]
 lb = LocalBlend(prompts, ("burger", "lasagne"))
-controller = AttentionReplace(prompts, NUM_DIFFUSION_STEPS,
-                              cross_replace_steps={"default_": 1., "lasagne": .2},
-                              self_replace_steps=0.4,
-                              local_blend=lb)
-_ = run_and_display(prompts, controller, latent=x_t, run_baseline=True)
+controller = AttentionReplace(
+    prompts,
+    NUM_DIFFUSION_STEPS,
+    cross_replace_steps={"default_": 1., "lasagne": .2},
+    self_replace_steps=0.4,
+    local_blend=lb
+)
+images, _ = run_and_display(prompts, controller, latent=x_t, run_baseline=True, generator=g_cpu)
+img_html = ptp_utils_no_use_juypter.view_images_html(images, prompts)
+report_sections.append(img_html)
 
 
-# ## Refinement edit
-
-# In[12]:
-
-
+# 4. 风格优化编辑（Refinement）
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("4. 风格优化编辑"))
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("添加新古典主义风格"))
 prompts = ["A painting of a squirrel eating a burger",
            "A neoclassical painting of a squirrel eating a burger"]
+controller = AttentionRefine(
+    prompts,
+    NUM_DIFFUSION_STEPS,
+    cross_replace_steps=.5,
+    self_replace_steps=.2
+)
+images, _ = run_and_display(prompts, controller, latent=x_t, generator=g_cpu)
+img_html = ptp_utils_no_use_juypter.view_images_html(images, prompts)
+report_sections.append(img_html)
 
-controller = AttentionRefine(prompts, NUM_DIFFUSION_STEPS,
-                             cross_replace_steps=.5, 
-                             self_replace_steps=.2)
-_ = run_and_display(prompts, controller, latent=x_t)
 
-
-# In[13]:
-
-
+# 5. 场景季节变化
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("5. 场景季节变化"))
+# 秋季
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("秋季场景"))
 prompts = ["a photo of a house on a mountain",
            "a photo of a house on a mountain at fall"]
+controller = AttentionRefine(
+    prompts,
+    NUM_DIFFUSION_STEPS,
+    cross_replace_steps=.8,
+    self_replace_steps=.4
+)
+images, _ = run_and_display(prompts, controller, latent=x_t, generator=g_cpu)
+img_html = ptp_utils_no_use_juypter.view_images_html(images, prompts)
+report_sections.append(img_html)
 
-
-controller = AttentionRefine(prompts, NUM_DIFFUSION_STEPS, cross_replace_steps=.8,
-                             self_replace_steps=.4)
-_ = run_and_display(prompts, controller, latent=x_t)
-
-
-# In[ ]:
-
-
+# 冬季
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("冬季场景"))
 prompts = ["a photo of a house on a mountain",
            "a photo of a house on a mountain at winter"]
+controller = AttentionRefine(
+    prompts,
+    NUM_DIFFUSION_STEPS,
+    cross_replace_steps=.8,
+    self_replace_steps=.4
+)
+images, _ = run_and_display(prompts, controller, latent=x_t, generator=g_cpu)
+img_html = ptp_utils_no_use_juypter.view_images_html(images, prompts)
+report_sections.append(img_html)
 
 
-controller = AttentionRefine(prompts, NUM_DIFFUSION_STEPS, cross_replace_steps=.8,
-                             self_replace_steps=.4)
-_ = run_and_display(prompts, controller, latent=x_t)
-
-
-# In[15]:
-
-
-prompts = ["soup",
-           "pea soup"] 
-
+# 6. 食物细化编辑
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("6. 食物细化编辑（汤→豌豆汤）"))
+prompts = ["soup", "pea soup"]
 lb = LocalBlend(prompts, ("soup", "soup"))
+controller = AttentionRefine(
+    prompts,
+    NUM_DIFFUSION_STEPS,
+    cross_replace_steps=.8,
+    self_replace_steps=.4,
+    local_blend=lb
+)
+images, _ = run_and_display(prompts, controller, latent=x_t, run_baseline=False, generator=g_cpu)
+img_html = ptp_utils_no_use_juypter.view_images_html(images, prompts)
+report_sections.append(img_html)
 
-controller = AttentionRefine(prompts, NUM_DIFFUSION_STEPS, cross_replace_steps=.8,
-                             self_replace_steps=.4,
-                             local_blend=lb)
-_ = run_and_display(prompts, controller, latent=x_t, run_baseline=False)
 
-
-# ## Attention Re-Weighting
-
-# In[16]:
-
-
+# 7. 注意力重加权（Attention Re-Weighting）
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("7. 注意力重加权"))
+# 增强"smiling"权重
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("增强'smiling'注意力权重（×5）"))
 prompts = ["a smiling bunny doll"] * 2
+equalizer = get_equalizer(prompts[1], ("smiling",), (5,))  # 权重放大5倍
+controller = AttentionReweight(
+    prompts,
+    NUM_DIFFUSION_STEPS,
+    cross_replace_steps=.8,
+    self_replace_steps=.4,
+    equalizer=equalizer
+)
+images, _ = run_and_display(prompts, controller, latent=x_t, run_baseline=False, generator=g_cpu)
+img_html = ptp_utils_no_use_juypter.view_images_html(images, ["原始", "增强'smiling'注意力"])
+report_sections.append(img_html)
 
-### pay 3 times more attention to the word "smiling"
-equalizer = get_equalizer(prompts[1], ("smiling",), (5,))
-controller = AttentionReweight(prompts, NUM_DIFFUSION_STEPS, cross_replace_steps=.8,
-                               self_replace_steps=.4,
-                               equalizer=equalizer)
-_ = run_and_display(prompts, controller, latent=x_t, run_baseline=False)
 
-
-# In[17]:
-
-
+# 8. 局部注意力调整（粉色自行车→粉色小熊）
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("8. 局部注意力调整（减少自行车的粉色）"))
 prompts = ["pink bear riding a bicycle"] * 2
-
-### we don't wont pink bikes, only pink bear.
-### we reduce the amount of pink but apply it locally on the bikes (attention re-weight + local mask )
-
-### pay less attention to the word "pink"
-equalizer = get_equalizer(prompts[1], ("pink",), (-1,))
-
-### apply the edit on the bikes 
-lb = LocalBlend(prompts, ("bicycle", "bicycle"))
-controller = AttentionReweight(prompts, NUM_DIFFUSION_STEPS, cross_replace_steps=.8,
-                               self_replace_steps=.4,
-                               equalizer=equalizer,
-                               local_blend=lb)
-_ = run_and_display(prompts, controller, latent=x_t, run_baseline=False)
-
-
-# ### Where are my croutons?
-# It might be useful to use Attention Re-Weighting with a previous edit method.
-
-# In[18]:
+equalizer = get_equalizer(prompts[1], ("pink",), (-1,))  # 降低"pink"权重
+lb = LocalBlend(prompts, ("bicycle", "bicycle"))  # 仅在自行车区域应用调整
+controller = AttentionReweight(
+    prompts,
+    NUM_DIFFUSION_STEPS,
+    cross_replace_steps=.8,
+    self_replace_steps=.4,
+    equalizer=equalizer,
+    local_blend=lb
+)
+images, _ = run_and_display(prompts, controller, latent=x_t, run_baseline=False, generator=g_cpu)
+img_html = ptp_utils_no_use_juypter.view_images_html(images, ["原始", "减少自行车粉色"])
+report_sections.append(img_html)
 
 
-prompts = ["soup",
-           "pea soup with croutons"] 
+# 9. 注意力增强（面包丁）
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("9. 注意力增强（突出面包丁）"))
+# 基础编辑
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("基础编辑：汤→带面包丁的豌豆汤"))
+prompts = ["soup", "pea soup with croutons"]
 lb = LocalBlend(prompts, ("soup", "soup"))
-controller = AttentionRefine(prompts, NUM_DIFFUSION_STEPS, cross_replace_steps=.8,
-                             self_replace_steps=.4, local_blend=lb)
-_ = run_and_display(prompts, controller, latent=x_t, run_baseline=False)
+controller_a = AttentionRefine(
+    prompts,
+    NUM_DIFFUSION_STEPS,
+    cross_replace_steps=.8,
+    self_replace_steps=.4,
+    local_blend=lb
+)
+images_a, _ = run_and_display(prompts, controller_a, latent=x_t, run_baseline=False, generator=g_cpu)
+img_html_a = ptp_utils_no_use_juypter.view_images_html(images_a, prompts)
+report_sections.append(img_html_a)
 
-
-# Now, with more attetnion to `"croutons"`
-
-# In[19]:
-
-
-prompts = ["soup",
-           "pea soup with croutons"] 
-
-
-lb = LocalBlend(prompts, ("soup", "soup"))
-controller_a = AttentionRefine(prompts, NUM_DIFFUSION_STEPS, cross_replace_steps=.8, 
-                               self_replace_steps=.4, local_blend=lb)
-
-### pay 3 times more attention to the word "croutons"
+# 增强"croutons"注意力
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("增强'croutons'注意力权重（×3）"))
 equalizer = get_equalizer(prompts[1], ("croutons",), (3,))
-controller = AttentionReweight(prompts, NUM_DIFFUSION_STEPS, cross_replace_steps=.8,
-                               self_replace_steps=.4, equalizer=equalizer, local_blend=lb,
-                               controller=controller_a)
-_ = run_and_display(prompts, controller, latent=x_t, run_baseline=False)
+controller = AttentionReweight(
+    prompts,
+    NUM_DIFFUSION_STEPS,
+    cross_replace_steps=.8,
+    self_replace_steps=.4,
+    equalizer=equalizer,
+    local_blend=lb,
+    controller=controller_a
+)
+images, _ = run_and_display(prompts, controller, latent=x_t, run_baseline=False, generator=g_cpu)
+img_html = ptp_utils_no_use_juypter.view_images_html(images, ["基础编辑", "增强面包丁注意力"])
+report_sections.append(img_html)
 
 
-# In[20]:
-
-
-prompts = ["potatos",
-           "fried potatos"] 
+# 10. 土豆→炸土豆（增强"fried"权重）
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("10. 强化烹饪状态（增强'fried'权重）"))
+# 基础编辑
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("基础编辑：土豆→炸土豆"))
+prompts = ["potatos", "fried potatos"]
 lb = LocalBlend(prompts, ("potatos", "potatos"))
-controller = AttentionRefine(prompts, NUM_DIFFUSION_STEPS, cross_replace_steps=.8,
-                             self_replace_steps=.4, local_blend=lb)
-_ = run_and_display(prompts, controller, latent=x_t, run_baseline=False)
+controller = AttentionRefine(
+    prompts,
+    NUM_DIFFUSION_STEPS,
+    cross_replace_steps=.8,
+    self_replace_steps=.4,
+    local_blend=lb
+)
+images_b, _ = run_and_display(prompts, controller, latent=x_t, run_baseline=False, generator=g_cpu)
+img_html_b = ptp_utils_no_use_juypter.view_images_html(images_b, prompts)
+report_sections.append(img_html_b)
 
-
-# In[21]:
-
-
-prompts = ["potatos",
-           "fried potatos"] 
-lb = LocalBlend(prompts, ("potatos", "potatos"))
-controller = AttentionRefine(prompts, NUM_DIFFUSION_STEPS, cross_replace_steps=.8, 
-                             self_replace_steps=.4, local_blend=lb)
-
-### pay 10 times more attention to the word "fried"
+# 增强"fried"注意力
+report_sections.append(ptp_utils_no_use_juypter.text_section_html("增强'fried'注意力权重（×10）"))
 equalizer = get_equalizer(prompts[1], ("fried",), (10,))
-controller = AttentionReweight(prompts, NUM_DIFFUSION_STEPS, cross_replace_steps=.8,
-                               self_replace_steps=.4, equalizer=equalizer, local_blend=lb,
-                               controller=controller_a)
-_ = run_and_display(prompts, controller, latent=x_t, run_baseline=False)
+controller = AttentionReweight(
+    prompts,
+    NUM_DIFFUSION_STEPS,
+    cross_replace_steps=.8,
+    self_replace_steps=.4,
+    equalizer=equalizer,
+    local_blend=lb,
+    controller=controller  # 复用基础编辑的controller
+)
+images, _ = run_and_display(prompts, controller, latent=x_t, run_baseline=False, generator=g_cpu)
+img_html = ptp_utils_no_use_juypter.view_images_html(images, ["基础编辑", "增强'fried'注意力"])
+report_sections.append(img_html)
+
+
+# 生成完整HTML报告
+full_html = ptp_utils_no_use_juypter.html_wrapper("\n".join(report_sections), "Prompt-to-Prompt 完整编辑结果")
+with open("prompt_to_prompt_complete_report.html", "w", encoding="utf-8") as f:
+    f.write(full_html)
+print("完整HTML报告已保存为 'prompt_to_prompt_complete_report.html'")
 
 
 # In[ ]:
