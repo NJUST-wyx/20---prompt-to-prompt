@@ -102,6 +102,6 @@ In this case, the user changes the weight of certain tokens in the prompt, e.g.,
 
 The results obtained using the program of Pytorch：prompt-to-prompt_stable1.html
 
-The results obtained using theprogram of Jittor：prompt-to-prompt_stable.html
+The results obtained using the program of Jittor：prompt-to-prompt_stable.html
 
 Our experimental results can be replicated, but the reason for the differences from the original results is that jtorch and jittor may have new random numbers.
