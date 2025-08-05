@@ -1,0 +1,49 @@
+source ~/.bashrc
+
+conda create -n cross-attention python=3.8 -y
+
+conda activate cross-attention
+
+sudo apt-get update
+sudo apt-get install python3.8-dev
+ls /root/miniconda3/envs/cross-attention/include/python3.8/Python.h
+
+
+source /etc/network_turbo           (autodl加速操作)
+
+pip install git+https://github.com/JittorRepos/jittor
+python -c "import jittor; import jittor.nn; print('jittor 模块导入成功')"
+//出现问题请看 https://discuss.jittor.org/t/topic/936
+
+pip install git+https://github.com/JittorRepos/jtorch
+python -c "import torch; print(torch.__version__)"
+
+pip install git+https://github.com/JittorRepos/diffusers_jittor
+pip install git+https://github.com/JittorRepos/transformers_jittor
+
+
+cd miniconda3/envs/cross-attention/JDiffusion
+pip install -e .
+python -c "import JDiffusion; print('JDiffusion installed successfully')"
+
+
+pip install opencv-python
+
+pip install ipython
+
+nvcc --version  （注意cuda要>=11.8）
+pip install cupy-cuda11x
+
+
+pip install jupytext
+//如果需要的话 jupytext --to notebook prompt-to-prompt_stable.py
+
+pip install ipykernel
+jupyter kernelspec list
+python -m ipykernel install --user --name cross-attention --display-name "Python (cross-attention)"
+
+//请手动切换内核
+
+pip install ipywidgets
+
+jupyter nbconvert --to html --execute --KernelManager.kernel_name=cross-attention prompt-to-prompt_stable.ipynb
