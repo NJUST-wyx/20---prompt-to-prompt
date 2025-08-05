@@ -114,16 +114,6 @@ def text_section_html(text: str, level: int = 2) -> str:
     return f'<h{level} class="title">{text}</h{level}>'
 
 
-
-
-
-
-
-
-
-
-
-
 def text_under_image(image: np.ndarray, text: str, text_color: Tuple[int, int, int] = (0, 0, 0)):
     h, w, c = image.shape
     offset = int(h * .2)
@@ -184,14 +174,9 @@ def latent2image(vae, latents):
     image = (image / 2 + 0.5).clamp(0, 1)
     image = image.cpu().permute(0, 2, 3, 1).numpy()
     image = (image * 255).astype(np.uint8)
+
     
-    # 新增：保存图像为PNG文件
-    output_dir = 'output_images'
-    os.makedirs(output_dir, exist_ok=True)
-    image_path = os.path.join(output_dir, 'generated_image.png')
-    Image.fromarray(image[0]).save(image_path)
-    
-    return image,image_path
+    return image
 
 
 def init_latent(latent, model, height, width, generator, batch_size):
