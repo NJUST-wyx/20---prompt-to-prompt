@@ -1,11 +1,11 @@
-[README.md](https://github.com/user-attachments/files/21600942/README.md)
+[Uploading README.md…]()
 # Prompt-to-Prompt
 
 > *Latent Diffusion* and *Stable Diffusion* Implementation
 
 
-![teaser](prompt-to-prompt-main-jittor/docs/teaser.png)
-### [Project Page]([NJUST-wyx/20---prompt-to-prompt](https://github.com/NJUST-wyx/20---prompt-to-prompt/tree/master))&ensp;&ensp;&ensp;[Paper](https://prompt-to-prompt.github.io/ptp_files/Prompt-to-Prompt_preprint.pdf)
+![teaser](docs/teaser.png)
+### [Project Page]([NJUST-wyx/20---prompt-to-prompt](https://github.com/NJUST-wyx/20---prompt-to-prompt))&ensp;&ensp;&ensp;[Paper](https://prompt-to-prompt.github.io/ptp_files/Prompt-to-Prompt_preprint.pdf)
 
 
 ## Install Requirements
@@ -102,6 +102,6 @@ In this case, the user changes the weight of certain tokens in the prompt, e.g.,
 
 The results obtained using the program of Pytorch：prompt-to-prompt_stable1.html
 
-The results obtained using the program of Jittor：prompt-to-prompt_stable.html
+The results obtained using theprogram of Jittor：prompt-to-prompt_stable.html
 
 Our experimental results can be replicated, but the reason for the differences from the original results is that jtorch and jittor may have new random numbers.
