@@ -149,20 +149,10 @@ import jittor
 # Set ```LOW_RESOURCE``` to ```True``` for running on 12GB GPU.
 
 def set_all_random_seeds(seed=42):
-    # 固定Python内置随机模块
     random.seed(seed)
     
-    # 固定NumPy随机种子
     np.random.seed(seed)
     
-    # # 固定PyTorch随机种子
-    # torch.manual_seed(seed)
-    # if torch.cuda.is_available():
-    #     torch.cuda.manual_seed_all(seed)  # 多GPU场景
-    #     torch.backends.cudnn.deterministic = True  # 确保CUDA卷积操作确定性
-    #     torch.backends.cudnn.benchmark = False  # 禁用自动优化（可能引入随机性）
-    
-    # 如果使用Jittor，固定Jittor的随机种子
     jittor.set_seed(seed)
 
 
