@@ -1,4 +1,4 @@
-[Uploading README.md…]()
+[README.md](https://github.com/user-attachments/files/21647627/README.md)
 [README.md](https://github.com/user-attachments/files/21600942/README.md)
 # Prompt-to-Prompt
 
@@ -98,6 +98,10 @@ In this case, the user changes the weight of certain tokens in the prompt, e.g.,
  * `self_replace_steps`: specifies the fraction of steps to replace the self attention maps.
  * `local_blend` (optional):  `LocalBlend` object which is used to make local edits. `LocalBlend` is initialized with the words from each prompt that correspond with the region in the image we want to edit.
  * `equalizer`: used for attention Re-weighting only. A vector of coefficients to multiply each cross-attention weight
+
+## Training script
+
+This article is training free.
 
 ## Testing script
 
